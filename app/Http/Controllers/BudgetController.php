@@ -60,20 +60,6 @@ class BudgetController extends Controller
         DB::beginTransaction();
 
         try {
-            // Tambahkan budget baru
-            // $budget = Budget::firstOrCreate([
-            //     'province_id' => $request->province_id,
-            //     'amount' => $request->amount_value, 
-            //     'user_id' => Auth::user()->id,
-            //     'description' => $request->description ?? ''
-            // ]);
-
-            // $totalAmount = Budget::where('province_id', $request->province_id)
-            // ->sum('amount'); 
-
-            // Budget::where('id', $budget->id)
-            // ->update(['total_amount' => $totalAmount]);
-
             BudgetHelper::create($request->province_id, $request->amount_value, Auth::user()->id, 'Masuk', $request->description, false);
 
             DB::commit();
@@ -132,7 +118,7 @@ class BudgetController extends Controller
             return redirect()->route('budget.index')->with('success', 'Data budget successfully created');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('budget.index')->with('error', 'Something went wrong :'.$e);
+            return redirect()->route('budget.index')->with('error', 'Something went wrong :'.$e->getMessage());
         }
     }
 }

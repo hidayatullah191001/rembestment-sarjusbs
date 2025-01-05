@@ -29,7 +29,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5><i class="ti-flag-alt me-2 text-primary"></i>Total Budget Sekarang</h5>
-                    <h2>Rp {{ App\Helpers\MyHelper::rupiah($lastTotalBudget) }}</h2>
+                    <h2>Rp {{ App\Helpers\MyHelper::rupiah(App\Helpers\BudgetHelper::getTotalBudget($province->id)) ?? '' }}</h2>
                 </div>
             </div>
         </div>

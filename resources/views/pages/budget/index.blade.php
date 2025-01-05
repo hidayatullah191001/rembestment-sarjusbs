@@ -50,7 +50,7 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $budget->province->name }}</td>
-                                    <td>Rp. {{ App\Helpers\MyHelper::rupiah($budget->total_amount) ?? '' }}</td>
+                                    <td>Rp. {{ App\Helpers\MyHelper::rupiah(App\Helpers\BudgetHelper::getTotalBudget($budget->province_id)) ?? '' }}</td>
                                     <td>{{ App\Helpers\MyHelper::ubahFormatTimestamp($budget->updated_at) ?? '' }}</td>
                                     <td class="w-25">
                                         <a href="{{ route('budget.show', App\Helpers\MyHelper::encodeID($budget->province_id)) }}" class="btn btn-sm btn-warning btn-icon-text"><i class="ti-eye btn-icon-prepend"></i>Show Detail</a>

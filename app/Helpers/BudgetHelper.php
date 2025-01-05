@@ -56,7 +56,6 @@ class BudgetHelper
     public static function delete($budgetId)
     {
         $budget = Budget::find($budgetId);
-
         if (!$budget) {
             throw new Exception('Budget not found.');
         }
@@ -66,131 +65,23 @@ class BudgetHelper
             })
             ->where('user_id', $budget->user_id)
             ->first();
-
-        if ($relocation) {
-            $relationBudget = BudgetRelocationRelation::where('budget_relocation_id', $relocation->id)->first();
-            // dd($relationBudget);
-
-            if ($relocation->from_province == $budget->province_id && $relocation->id == $relationBudget->budget_relocation_id && $budget->status == 'Keluar') {
-                // Ini Kondisi untuk data from
-                // 1. Cek dahulu apakah data seterustnya lebih dari 1, jika lebih dari 1 sebelum delete maka update dahulu total_amount selanjutnya
-                // dd('kondisi 1');
-                $newFromBudgets = Budget::where('province_id', $relocation->from_province)
-                    ->where('id', '>', $budget->id)
-                    ->get();
-                if (count($newFromBudgets) >= 1) {
-                    foreach ($newFromBudgets as $item) {
-                        $item->total_amount += $budget->amount;
-                        $item->save();
-                    }
-                    $toProvinceBudget = Budget::where('province_id', $relocation->to_province)
-                        ->orderBy('id', 'desc')
-                        ->first();
-                    if ($toProvinceBudget) {
-                        $toProvinceBudget->total_amount -= $budget->amount;
-                        $toProvinceBudget->save();
-                    }
-                }
-                $toBudget = Budget::find($relationBudget->budget_to_id);
-                $toBudget->delete();
-
-            } else {
-
-                $newToBudgets = Budget::where('province_id', $relocation->to_province)
-                    ->where('id', '>', $budget->id)
-                    ->get();
-                if (count($newToBudgets) >= 1) {
-                    foreach ($newToBudgets as $item) {
-                        $item->total_amount -= $budget->amount;
-                        $item->save();
-                    }
-
-                    $fromProvinceBudget = Budget::where('province_id', $relocation->from_province)
-                        ->orderBy('id', 'desc')
-                        ->first();
-                    if ($fromProvinceBudget) {
-                        $fromProvinceBudget->total_amount += $budget->amount;
-                        $fromProvinceBudget->save();
-                    }
-                }
-                $fromBudget = Budget::find($relationBudget->budget_from_id);
-                    $fromBudget->delete();
+        if($relocation){
+            $relationBudget = BudgetRelocationRelation::with(['budgetRelocation', 'budgetFrom', 'budgetTo'])->where('budget_relocation_id', $relocation->id)->first();
+       
+            if($relationBudget ){
+                $relationBudget->budgetFrom->delete();
+                $relationBudget->budgetTo->delete();
+                $relationBudget->budgetRelocation->delete();
+                $relationBudget->delete();
             }
-
-            // if ($relocation->from_province == $budget->province_id && $budget->status == 'Keluar') {
-
-            //     // Tambahkan amount ke total_amount di from_province
-            //     $fromProvinceBudget = Budget::where('province_id', $relocation->from_province)
-            //         ->orderBy('id', 'desc')
-            //         ->first();
-            //     if ($fromProvinceBudget) {
-            //         $fromProvinceBudget->total_amount += $budget->amount;
-            //         $fromProvinceBudget->save();
-            //     }
-            // } elseif ($relocation->to_province == $budget->province_id && $budget->status == 'Masuk') {
-            //     // Kurangi amount dari total_amount di to_province
-            //     $toProvinceBudget = Budget::where('province_id', $relocation->to_province)
-            //         ->orderBy('id', 'desc')
-            //         ->first();
-            //     // dd($toProvinceBudget);
-            //     if ($toProvinceBudget) {
-            //         $toProvinceBudget->total_amount -= $budget->amount;
-            //         $toProvinceBudget->save();
-            //     }
-            // }
-
-            // $relationBudget = BudgetRelocationRelation::where('budget_relocation_id', $relocation->id)->first();
-
-            // if($budget->id == $relationBudget->budget_to_id){
-            //     $newBudget = Budget::where('province_id', $budget->province_id)->where('id', '>', $budget->id)->get();
-
-            //     foreach ($newBudget as $item) {
-            //         dd($item->total_amount);
-            //         $item->total_amount -= ($budget->amount + $item->amount);
-            //         $item->update();
-            //     }
-            //     $fromBudget = Budget::find($relationBudget->budget_from_id);
-            //     $fromBudget->delete();
-            // }else{
-            //     $newBudget = Budget::where('province_id', $budget->province_id)->where('id', '>', $budget->id)->get();
-
-            //     foreach ($newBudget as $item) {
-
-            //         $item->total_amount += ($budget->amount);
-
-            //         $item->update();
-            //     }
-            //     dd($newBudget);
-            //     $toBudget = Budget::find($relationBudget->budget_to_id);
-
-            //     $toBudget->delete();
-            // }
-            $relocation->delete();
-            $relationBudget->delete();
-        } else {
-            // Ini kondisi jika bukan relocation dan delete data ditengah range, maka harus update semua total_amountnya dikurang dengan amount dari $budget
-           
-            $newBudget = Budget::where('province_id', $budget->province_id)
-                ->where('id', '>=', $budget->id)
-                ->get();
-
-            foreach ($newBudget as $item) {
-                if($item->total_amount < $budget->amount){
-                    $item->total_amount = $item->amount;    
-                }else{
-                    $item->total_amount -= $budget->amount;
-                }
-                
-                $item->update();
-            }
-            // dd($newBudget);
-
         }
-
-        // Hapus data budget
-        $budget->delete();
+        $currentTotalAmount = BudgetHelper::getTotalBudget($budget->province_id);
+        if($currentTotalAmount >= $budget->amount){
+            $budget->delete();
+        }else{
+            throw new Exception('Current total amount is less than or equal to the budget amount. Delete operation is not allowed.');
+        }
     }
-
     public static function getLastTotalBudget($provinceId, $status = null)
     {
         if ($status != null) {
@@ -202,5 +93,18 @@ class BudgetHelper
                 ->first();
         }
         return $budget->total_amount ?? 0;
+    }
+
+    public static function getTotalBudget($provinceId)
+    {
+        $budget = Budget::select(
+            DB::raw('
+                SUM(CASE WHEN status = "Masuk" THEN amount ELSE 0 END) -
+                SUM(CASE WHEN status = "Keluar" THEN amount ELSE 0 END) as total_amount
+            '),
+        )
+            ->where('province_id', $provinceId)
+            ->first();
+        return $budget->total_amount;
     }
 }
