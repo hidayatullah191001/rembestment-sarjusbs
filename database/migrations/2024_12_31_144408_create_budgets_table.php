@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('province_id')->constrained('provinces')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('amount');
+            $table->string('status')->default('Masuk');
             $table->string('description')->nullable();
             $table->timestamps();
         });

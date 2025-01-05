@@ -10,23 +10,15 @@ use Illuminate\Support\Facades\DB;
 
 class BudgetHelper
 {
-    public static function create($provinceId, $amount, $userId, $status = 'Masuk', $description = '', $relocation = false, $currentTotal = null)
+    public static function create($provinceId, $amount, $userId, $status = 'Masuk', $description = '', $relocation = false)
     {
         if ($relocation == false) {
-            $budget = Budget::select('total_amount')->join(DB::raw('(SELECT MAX(id) as latest_id FROM budgets GROUP BY province_id) as latest_budget'), 'budgets.id', '=', 'latest_budget.latest_id')->where('budgets.province_id', $provinceId)->first();
-            if ($budget == null) {
-                $currentTotalAmount = $amount;
-            } else {
-                $currentTotalAmount = $amount + $budget->total_amount;
-            }
-
             Budget::firstOrCreate([
                 'province_id' => $provinceId,
                 'amount' => $amount,
                 'user_id' => $userId,
                 'status' => $status,
                 'description' => $description,
-                'total_amount' => $currentTotalAmount,
             ]);
         } else {
             if ($status == 'Masuk') {
@@ -36,7 +28,6 @@ class BudgetHelper
                     'user_id' => $userId,
                     'status' => $status,
                     'description' => $description,
-                    'total_amount' => $currentTotal,
                 ]);
                 return $budget;
             } elseif ($status == 'Keluar') {
@@ -46,7 +37,6 @@ class BudgetHelper
                     'user_id' => $userId,
                     'status' => $status,
                     'description' => $description,
-                    'total_amount' => $currentTotal,
                 ]);
                 return $budget;
             }
@@ -67,31 +57,27 @@ class BudgetHelper
             ->first();
         if($relocation){
             $relationBudget = BudgetRelocationRelation::with(['budgetRelocation', 'budgetFrom', 'budgetTo'])->where('budget_relocation_id', $relocation->id)->first();
-       
-            if($relationBudget ){
+            if($relationBudget){
                 $relationBudget->budgetFrom->delete();
                 $relationBudget->budgetTo->delete();
                 $relationBudget->budgetRelocation->delete();
                 $relationBudget->delete();
             }
-        }
-        $currentTotalAmount = BudgetHelper::getTotalBudget($budget->province_id);
-        if($currentTotalAmount >= $budget->amount){
             $budget->delete();
         }else{
-            throw new Exception('Current total amount is less than or equal to the budget amount. Delete operation is not allowed.');
+            $currentTotalAmount = BudgetHelper::getTotalBudget($budget->province_id);
+            if($currentTotalAmount >= $budget->amount){
+                $budget->delete();
+            }else{
+                throw new Exception('Jumlah total saat ini kurang dari atau sama dengan jumlah anggaran. Operasi penghapusan tidak diizinkan.');
+            }
         }
+       
     }
     public static function getLastTotalBudget($provinceId, $status = null)
     {
-        if ($status != null) {
-            $budget = Budget::select(DB::raw('SUM(amount) as total_amount'))->where('province_id', $provinceId)->where('status', $status)->first();
-        } else {
-            $budget = Budget::select('total_amount')
-                ->where('province_id', $provinceId)
-                ->orderBy('id', 'DESC') // Urutkan berdasarkan ID terbaru
-                ->first();
-        }
+        $budget = Budget::select(DB::raw('SUM(amount) as total_amount'))->where('province_id', $provinceId)->where('status', $status)->first();
+
         return $budget->total_amount ?? 0;
     }
 

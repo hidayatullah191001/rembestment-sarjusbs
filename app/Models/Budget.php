@@ -8,13 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Budget extends Model
 {
     use HasFactory;
-
+    protected $with = ['user', 'province'];
     protected $fillable = [
         'province_id',
         'user_id',
         'amount',
         'description',
-        'total_amount',
         'status'
     ];
 
@@ -25,4 +24,16 @@ class Budget extends Model
     public function province(){
         return $this->belongsTo(Province::class);
     }
+
+    public function relocationsFrom()
+    {
+        return $this->hasMany(BudgetRelocationRelation::class, 'budget_from_id');
+    }
+
+    // Relasi untuk budget_to_id
+    public function relocationsTo()
+    {
+        return $this->hasMany(BudgetRelocationRelation::class, 'budget_to_id');
+    }
+
 }

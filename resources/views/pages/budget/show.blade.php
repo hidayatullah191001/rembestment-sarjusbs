@@ -29,7 +29,8 @@
             <div class="card">
                 <div class="card-body">
                     <h5><i class="ti-flag-alt me-2 text-primary"></i>Total Budget Sekarang</h5>
-                    <h2>Rp {{ App\Helpers\MyHelper::rupiah(App\Helpers\BudgetHelper::getTotalBudget($province->id)) ?? '' }}</h2>
+                    <h2>Rp {{ App\Helpers\MyHelper::rupiah(App\Helpers\BudgetHelper::getTotalBudget($province->id)) ?? '' }}
+                    </h2>
                 </div>
             </div>
         </div>
@@ -64,6 +65,7 @@
                                     <th>Last Updated</th>
                                     <th>Created By</th>
                                     <th>Description</th>
+                                    <th>Relokasi</th>
                                     <th class="w-25">Action</th>
                                 </tr>
                             </thead>
@@ -84,9 +86,17 @@
                                         <td>{{ App\Helpers\MyHelper::ubahFormatTimestamp($budget->updated_at) ?? '' }}</td>
                                         <td>{{ $budget->user->name }}</td>
                                         <td>{{ $budget->description ?? '-' }}</td>
+                                        <td>
+                                            @if ($budget->relocationsFrom->isNotEmpty() || $budget->relocationsTo->isNotEmpty())
+                                                <button class="btn btn-primary btn-sm view-relocation-btn"
+                                                    data-budget-id="{{ $budget->id }}">
+                                                    View Relocation Details
+                                                </button>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td class="w-25">
-                                            {{-- <a href="{{ route('budget.show', App\Helpers\MyHelper::encodeID($budget->province_id)) }}" class="btn btn-sm btn-warning btn-icon-text"><i class="ti-eye btn-icon-prepend"></i>Show Detail</a>
-                                        <button data-bs-toggle="modal" data-bs-target="#relocationModal{{ $budget->province_id }}"  class="btn btn-sm btn-success btn-icon-text"><i class="ti-direction-alt btn-icon-prepend"></i>Relocation</button> --}}
                                             <form
                                                 action="{{ route('budget.destroy', App\Helpers\MyHelper::encodeID($budget->id)) }}"
                                                 method="post" id="deleteBudget{{ $budget->id }}">
@@ -106,13 +116,33 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="relocationModal" tabindex="-1" aria-labelledby="relocationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="relocationModalLabel">Relocation Details</h5>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Status:</strong> <span id="modalBudgetStatus">-</span></p>
+                    <div id="relocationInfo">
+                        <p><strong>Relocation:</strong> <span id="modalRelocation">-</span></p>
+                        <p><strong>Amount:</strong> <span id="modalAmount">-</span></p>
+                    </div>
+                    <p id="noRelocationData" class="text-muted">No relocation data found.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
 @push('addon-script')
     <script>
         function confirmDelete(itemId) {
-            console.log(itemId);
             return Swal.fire({
                 title: 'Are you sure?',
                 text: "Data will be deleted permanently",
@@ -123,7 +153,7 @@
                 color: "#575656",
                 customClass: {
                     confirmButton: 'btn btn-primary me-3',
-                    cancelButton : 'btn btn-danger'
+                    cancelButton: 'btn btn-danger'
                 },
                 buttonsStyling: false
             }).then((result) => {
@@ -132,5 +162,75 @@
                 }
             });
         }
+
+        $(document).on('click', '.view-relocation-btn', function() {
+            const budgetId = $(this).data('budget-id');
+
+            // Clear modal content
+            $('#modalBudgetId').text('-');
+            $('#modalBudgetStatus').text('-');
+            $('#modalRelocation').text('-');
+            $('#modalAmount').text('-');
+            $('#relocationInfo').hide();
+            $('#noRelocationData').hide();
+
+            // Fetch data from API
+            $.ajax({
+                url: `/api/relocations/${budgetId}`,
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const budget = response.budget;
+                        const relocationInfo = response.relocation_info;
+                        $('#modalBudgetStatus').text(budget.status);
+
+                        if (relocationInfo) {
+                            $('#relocationInfo').show();
+                            if (budget.status === 'Keluar') {
+                                $('#modalRelocation').text(
+                                    `To Province: ${relocationInfo.province.name}`);
+                            } else if (budget.status === 'Masuk') {
+                                $('#modalRelocation').text(
+                                    `From Province: ${relocationInfo.province.name}`);
+                            }
+                            if (budget.status === 'Keluar') {
+                                $('#modalAmount').text(`- ${formatRupiah(relocationInfo.amount.toString(), 'Rp')}`);
+                                $('#modalAmount').addClass('text-danger');
+                            } else if (budget.status === 'Masuk') {
+                                $('#modalAmount').text(`+ ${formatRupiah(relocationInfo.amount.toString(), 'Rp')}`);
+                                $('#modalAmount').addClass('text-success');
+                            }
+
+                           
+                        } else {
+                            $('#noRelocationData').show();
+                        }
+                    }
+                },
+                error: function() {
+                    alert('Failed to fetch relocation details.');
+                },
+            });
+
+            // Show modal
+            $('#relocationModal').modal('show');
+
+            function formatRupiah(angka, prefix) {
+                let number_string = angka.replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                    separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+
+                rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+                return prefix == undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+            }
+
+        });
     </script>
 @endpush

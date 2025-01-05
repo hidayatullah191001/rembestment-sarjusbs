@@ -58,37 +58,43 @@ class BudgetRelocationController extends Controller
                 DB::raw('
                     SUM(CASE WHEN status = "Masuk" THEN amount ELSE 0 END) -
                     SUM(CASE WHEN status = "Keluar" THEN amount ELSE 0 END) as total_amount
-                ')
-            )->where('province_id', $fromProvinceId)->first();
-            
-            if($fromBudgetDB->total_amount < $request->amount_relocation_value){
+                '),
+            )
+                ->where('province_id', $fromProvinceId)
+                ->first();
+
+            if ($fromBudgetDB->total_amount < $request->amount_relocation_value) {
                 return redirect()->route('budget.index')->with('error', 'Budget asal tidak cukup');
-            }else{
+            } else {
                 $toBudget = Budget::where('province_id', $toProvinceId)->first();
-                if($toBudget){
+                if ($toBudget) {
                     $toBudgetDB = Budget::select(
                         DB::raw('
                             SUM(CASE WHEN status = "Masuk" THEN amount ELSE 0 END) -
                             SUM(CASE WHEN status = "Keluar" THEN amount ELSE 0 END) as total_amount
-                        ')
-                    )->where('province_id', $toProvinceId)->first();
+                        '),
+                    )
+                        ->where('province_id', $toProvinceId)
+                        ->first();
 
-                    $budgetFrom = Budget::firstOrCreate([
-                        'province_id' => $fromProvinceId,
-                        'amount' => $request->amount_relocation_value,
-                        'user_id' => Auth::user()->id,
-                        'status' => 'Keluar',
-                        'description' => $request->description,
-                        'total_amount' => 0,
-                    ]);
-                    $budgetTo = Budget::firstOrCreate([
-                        'province_id' => $toProvinceId,
-                        'amount' => $request->amount_relocation_value,
-                        'user_id' => Auth::user()->id,
-                        'status' => 'Masuk',
-                        'description' => $request->description,
-                        'total_amount' => 0,
-                    ]);
+                    // $budgetFrom = Budget::firstOrCreate([
+                    //     'province_id' => $fromProvinceId,
+                    //     'amount' => $request->amount_relocation_value,
+                    //     'user_id' => Auth::user()->id,
+                    //     'status' => 'Keluar',
+                    //     'description' => $request->description,
+                    // ]);
+                    $budgetFrom = BudgetHelper::create($fromProvinceId, $request->amount_relocation_value, Auth::user()->id, 'Keluar', $request->description, true);
+
+                    // $budgetTo = Budget::firstOrCreate([
+                    //     'province_id' => $toProvinceId,
+                    //     'amount' => $request->amount_relocation_value,
+                    //     'user_id' => Auth::user()->id,
+                    //     'status' => 'Masuk',
+                    //     'description' => $request->description,
+                    // ]);
+                    $budgetTo = BudgetHelper::create($toProvinceId, $request->amount_relocation_value, Auth::user()->id, 'Masuk', $request->description, true);
+
                     $budgetRelocation = BudgetRelocation::create([
                         'from_province' => $fromProvinceId,
                         'to_province' => $toProvinceId,
@@ -106,7 +112,7 @@ class BudgetRelocationController extends Controller
                         'budget_from_id' => $budgetFrom->id,
                         'budget_to_id' => $budgetTo->id,
                     ]);
-                }else{
+                } else {
                     return redirect()->route('budget.index')->with('error', 'Maaf, tidak bisa melakukan relokasi budget karena provinsi tujuan belum pernah dibuat budget awal. Solusi : Buat budgetnya di menu create dengan provinsi tersebut');
                 }
             }
@@ -114,7 +120,9 @@ class BudgetRelocationController extends Controller
             return redirect()->route('budget.index')->with('success', 'Relokasi budget berhasil!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('budget.index')->with('error', ['message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            return redirect()
+                ->route('budget.index')
+                ->with('error', ['message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 

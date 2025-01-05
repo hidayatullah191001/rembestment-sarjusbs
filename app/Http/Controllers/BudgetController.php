@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\BudgetHelper;
 use App\Helpers\MyHelper;
 use App\Models\Budget;
+use App\Models\BudgetRelocation;
+use App\Models\BudgetRelocationRelation;
 use App\Models\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,14 +20,7 @@ class BudgetController extends Controller
      */
     public function index()
     {
-        $budgets = Budget::select('budgets.*')
-        ->join(
-            DB::raw('(SELECT MAX(id) as latest_id FROM budgets GROUP BY province_id) as latest_budget'),
-            'budgets.id',
-            '=',
-            'latest_budget.latest_id'
-        )
-        ->get();
+        $budgets = Budget::select('budgets.*')->join(DB::raw('(SELECT MAX(id) as latest_id FROM budgets GROUP BY province_id) as latest_budget'), 'budgets.id', '=', 'latest_budget.latest_id')->get();
         $provinces = Province::all();
         return view('pages.budget.index', compact('budgets', 'provinces'));
     }
@@ -52,9 +47,7 @@ class BudgetController extends Controller
 
         if ($validation->fails()) {
             $errors = $validation->errors();
-            return redirect()->route('budget.create')
-                ->withErrors($errors)
-                ->withInput();
+            return redirect()->route('budget.create')->withErrors($errors)->withInput();
         }
 
         DB::beginTransaction();
@@ -67,7 +60,9 @@ class BudgetController extends Controller
             return redirect()->route('budget.index')->with('success', 'Data budget successfully created');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('budget.index')->with('error', 'Something went wrong :'.$e);
+            return redirect()
+                ->route('budget.index')
+                ->with('error', 'Something went wrong :' . $e->getMessage());
         }
     }
 
@@ -77,16 +72,16 @@ class BudgetController extends Controller
     public function show(string $encodeId)
     {
         $provinceId = MyHelper::decodeID($encodeId);
-        $province = Province::with(['budgets', 'budgetRelocations'])->where('id', $provinceId)->first();
+        $province = Province::with(['budgets', 'budgetRelocations'])
+            ->where('id', $provinceId)
+            ->first();
         $lastTotalBudgetMasuk = BudgetHelper::getLastTotalBudget($provinceId, 'Masuk');
         $lastTotalBudgetKeluar = BudgetHelper::getLastTotalBudget($provinceId, 'Keluar');
-        $lastTotalBudget= BudgetHelper::getLastTotalBudget($provinceId);
         return view('pages.budget.show', [
             'province' => $province,
             'lastTotalBudgetMasuk' => $lastTotalBudgetMasuk,
             'lastTotalBudgetKeluar' => $lastTotalBudgetKeluar,
-            'lastTotalBudget' => $lastTotalBudget,
-        ]);  
+        ]);
     }
 
     /**
@@ -115,10 +110,37 @@ class BudgetController extends Controller
         try {
             BudgetHelper::delete($budgetId);
             DB::commit();
-            return redirect()->route('budget.index')->with('success', 'Data budget successfully created');
+            return redirect()->route('budget.index')->with('success', 'Data budget successfully deleted');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('budget.index')->with('error', 'Something went wrong :'.$e->getMessage());
+            return redirect()
+                ->route('budget.index')
+                ->with('error', 'Something went wrong :' . $e->getMessage());
         }
+    }
+
+    public function getRelocations($id)
+    {
+        $budget = Budget::findOrFail($id);
+        $relocation = BudgetRelocation::where('amount_relocation', $budget->amount)
+        ->where(function ($query) use ($budget) {
+            $query->where('from_province', $budget->province_id)->orWhere('to_province', $budget->province_id);
+        })
+        ->where('user_id', $budget->user_id)
+        ->first();
+        $relationBudget = BudgetRelocationRelation::with(['budgetRelocation', 'budgetFrom', 'budgetTo'])->where('budget_relocation_id', $relocation->id)->first();
+        
+        $relocationInfo = null;
+
+        if ($budget->status == 'Keluar') {
+            $relocationInfo = $relationBudget->budgetTo;
+        } elseif ($budget->status == 'Masuk') {
+            $relocationInfo = $relationBudget->budgetFrom;
+        }
+        return response()->json([
+            'success' => true,
+            'budget' => $budget,
+            'relocation_info' => $relocationInfo,
+        ]);
     }
 }

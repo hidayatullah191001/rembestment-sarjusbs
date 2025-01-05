@@ -21,6 +21,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->boolean('is_true')->nullable();
             $table->string('description')->nullable();
+            $table->unsignedBigInteger('to_start_amount')->nullable();
+            $table->unsignedBigInteger('to_final_amount')->nullable();
             $table->timestamps();
         });
     }

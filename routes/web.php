@@ -78,6 +78,7 @@ Route::group(['middleware' => ['auth', 'isadmin']], function () {
     Route::resource('user', UserController::class);
     Route::resource('province', ProvinceController::class);
     Route::resource('budget/relocation', BudgetRelocationController::class);
+    Route::get('/api/relocations/{id}', [BudgetController::class, 'getRelocations']);
 });
 
 // Route::middleware(['auth', 'isadmin'])->group(function () {
