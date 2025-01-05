@@ -32,8 +32,8 @@
             </a>
         </li> --}}
 
-        <li class="nav-item">
-            <a class="nav-link">
+        <li class="nav-item {{ Route::is('entertain.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('entertain.index') }}">
                 <i class="ti-clipboard menu-icon"></i>
                 <span class="menu-title">User Entertain</span>
             </a>

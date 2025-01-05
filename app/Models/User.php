@@ -56,5 +56,8 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Province::class);
     }
-
+    public function userEntertains()
+    {
+        return $this->hasMany(UserEntertain::class, 'user_id');
+    }
 }

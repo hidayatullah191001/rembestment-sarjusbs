@@ -16,6 +16,6 @@ class UserEntertainPeserta extends Model
     ];
     public function userEntertain()
     {
-        return $this->belongsTo(UserEntertain::class, 'id_user_entertain');
+    return $this->belongsTo(UserEntertain::class, 'user_entertain_id');
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\BudgetRelocationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProvinceController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserEntertainController;
 use App\Http\Controllers\WelcomeController;
 use App\Models\UserEntertainPeserta;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,13 @@ Route::group(['middleware' => ['auth', 'isadmin']], function () {
     Route::resource('province', ProvinceController::class);
     Route::resource('budget/relocation', BudgetRelocationController::class);
     Route::get('/api/relocations/{id}', [BudgetController::class, 'getRelocations']);
+    Route::resource('entertain', UserEntertainController::class);
+    Route::get('/api/generatePdf/{id}', [UserEntertainController::class, 'generatePdf']);
+
+    Route::get('/get_entertain_data', [HomeController::class, 'getEntertainData']);
+    Route::get('/get_entertain_user_input_data', [HomeController::class, 'getEntertainUserInputData']);
+    Route::get('/get_budget_data', [HomeController::class, 'getBudgetData']);
+
 });
 
 // Route::middleware(['auth', 'isadmin'])->group(function () {

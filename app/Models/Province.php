@@ -19,4 +19,9 @@ class Province extends Model
     {
         return $this->hasMany(BudgetRelocation::class, 'from_province', 'id');
     }
+
+    public function userEntertains()
+    {
+        return $this->hasMany(UserEntertain::class, 'province_id');
+    }
 }

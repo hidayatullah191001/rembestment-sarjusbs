@@ -55,24 +55,25 @@ class BudgetHelper
             })
             ->where('user_id', $budget->user_id)
             ->first();
-        if($relocation){
-            $relationBudget = BudgetRelocationRelation::with(['budgetRelocation', 'budgetFrom', 'budgetTo'])->where('budget_relocation_id', $relocation->id)->first();
-            if($relationBudget){
+        if ($relocation) {
+            $relationBudget = BudgetRelocationRelation::with(['budgetRelocation', 'budgetFrom', 'budgetTo'])
+                ->where('budget_relocation_id', $relocation->id)
+                ->first();
+            if ($relationBudget) {
                 $relationBudget->budgetFrom->delete();
                 $relationBudget->budgetTo->delete();
                 $relationBudget->budgetRelocation->delete();
                 $relationBudget->delete();
             }
             $budget->delete();
-        }else{
+        } else {
             $currentTotalAmount = BudgetHelper::getTotalBudget($budget->province_id);
-            if($currentTotalAmount >= $budget->amount){
+            if ($currentTotalAmount >= $budget->amount) {
                 $budget->delete();
-            }else{
+            } else {
                 throw new Exception('Jumlah total saat ini kurang dari atau sama dengan jumlah anggaran. Operasi penghapusan tidak diizinkan.');
             }
         }
-       
     }
     public static function getLastTotalBudget($provinceId, $status = null)
     {
@@ -81,16 +82,21 @@ class BudgetHelper
         return $budget->total_amount ?? 0;
     }
 
-    public static function getTotalBudget($provinceId)
+    public static function getTotalBudget($provinceId = null)
     {
-        $budget = Budget::select(
+        $query = Budget::select(
             DB::raw('
-                SUM(CASE WHEN status = "Masuk" THEN amount ELSE 0 END) -
-                SUM(CASE WHEN status = "Keluar" THEN amount ELSE 0 END) as total_amount
-            '),
-        )
-            ->where('province_id', $provinceId)
-            ->first();
-        return $budget->total_amount;
+            SUM(CASE WHEN status = "Masuk" THEN amount ELSE 0 END) -
+            SUM(CASE WHEN status = "Keluar" THEN amount ELSE 0 END) as total_amount
+        '),
+        );
+
+        // Jika provinceId tidak null, tambahkan kondisi where
+        if ($provinceId !== null) {
+            $query->where('province_id', $provinceId);
+        }
+
+        $budget = $query->first();
+        return $budget->total_amount ?? 0; // Pastikan mengembalikan 0 jika total_amount null
     }
 }
