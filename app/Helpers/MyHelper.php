@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\MetaApp;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 
@@ -42,5 +43,10 @@ class MyHelper
         }
 
         return null; // Return null jika decoding gagal
+    }
+
+    public static function getSetting($field)
+    {
+        return MetaApp::where('field', $field)->value('value');
     }
 }

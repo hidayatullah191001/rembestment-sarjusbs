@@ -6,7 +6,9 @@ use App\Models\Province;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -149,5 +151,46 @@ class UserController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('pages.users.profile', compact('user'));
+    }
+    public function profileUpdate(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validasi input
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+            'photo_profile' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        // Update nama
+        $user->name = $request->name;
+
+        // Update password jika ada
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        // Update photo_profile jika ada
+        if ($request->hasFile('photo_profile')) {
+            // Hapus foto lama jika ada
+            if ($user->photo_profile) {
+                Storage::delete($user->photo_profile);
+            }
+
+            // Simpan foto baru
+            $path = $request->file('photo_profile')->store('photo_profiles', 'public');
+            $user->photo_profile = $path;
+        }
+
+        $user->update();
+
+        return redirect()->route('profile.index')->with('success', 'Profile updated successfully.');
     }
 }

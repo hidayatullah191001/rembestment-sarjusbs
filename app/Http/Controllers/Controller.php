@@ -9,4 +9,11 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+    public function error404()
+    {
+        return view('404', [
+            'title' => 'Error 404',
+        ]);
+    }
+
 }

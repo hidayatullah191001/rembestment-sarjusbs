@@ -24,7 +24,7 @@
                     <div class="row text-center w-100 mx-0">
                         <div class="col-lg-4 mx-auto">
                             <div class="brand-logo">
-                                <img src="{{ asset('assets') }}/images/logo.svg" alt="logo" />
+                                <img src="{{ asset('storage/' . App\Helpers\MyHelper::getSetting('logo_large')) }}" alt="logo" />
                             </div>
                             <h4>Halo, Silahkan isi Form Entertain</h4>
                         </div>
@@ -66,6 +66,7 @@
                                         <input type="text" class="form-control form-control-sm" id="nama_lengkap"
                                             name="nama_lengkap" value="{{ old('nama_lengkap', $step1Data['nama_lengkap'] ?? '') }}" readonly required>
                                     </div>
+                                    
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
                                         <input type="email" class="form-control form-control-sm" id="email"

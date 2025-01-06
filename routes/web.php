@@ -1,15 +1,21 @@
 <?php
 
+use App\Exports\UserEntertainExport;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\BudgetRelocationController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MetaAppController;
 use App\Http\Controllers\ProvinceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEntertainController;
 use App\Http\Controllers\WelcomeController;
 use App\Models\UserEntertainPeserta;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Maatwebsite\Excel\Facades\Excel;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,76 +29,45 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
-
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Auth::routes(['register' => false]);
 
 Route::post('/save-step-1', [WelcomeController::class, 'saveStep1']);
 Route::post('/save-step-2', [WelcomeController::class, 'saveStep2']);
 Route::post('/save-step-3', [WelcomeController::class, 'saveStep3']);
 Route::post('/store-entertain', [WelcomeController::class, 'store'])->name('store-entertain');
 
-// web.php atau api.php
 Route::get('/get-users-by-province/{province_id}', [WelcomeController::class, 'getUsersByProvince'])->name('get-users-by-province');
-
-Route::get('/cetakPDF', function () {
-    $peserta1 = new UserEntertainPeserta();
-    $peserta1->id = 1;
-    $peserta1->user_entertain_id = 1;
-    $peserta1->nama_pelanggan = 'John Doe';
-    $peserta1->internal_icon = 'john.doe@example.com';
-    $peserta1->created_at = now();
-
-    $peserta2 = new UserEntertainPeserta();
-    $peserta2->id = 2;
-    $peserta1->user_entertain_id = 2;
-    $peserta2->nama_pelanggan = 'Jane Doe';
-    $peserta2->internal_icon = 'jane.doe@example.com';
-    $peserta2->created_at = now();
-
-    // Masukkan ke dalam array atau collection
-    $peserta = [$peserta1, $peserta2];
-
-    $pdfData = [
-        'hari' => 'Senin',
-        'tanggal' => '2024-12-12',
-        'waktu' => '13:36',
-        'tipe' => 'Voucher Hotel',
-        'nilai_entertain' => '200000',
-        'revenue' => '5000000',
-        'pelanggan' => 'Setia Arya',
-        'peserta' => $peserta,
-        'topik' => 'Topik ',
-        'aktivitas' => 'Aktivitas kedua',
-        'target_pelaksanaan' => 'Target Pelaksaanaan 22',
-        'nama_account_manager' => 'Budi Santoso',
-        'nama_kanwil_manager' => 'Maruf Firaun',
-    ];
-
-    return view('pdf-entertain', $pdfData);
-});
 
 Route::group(['middleware' => ['auth', 'isadmin']], function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('admin');
-    Route::resource('budget', BudgetController::class);
-    Route::resource('user', UserController::class);
-    Route::resource('province', ProvinceController::class);
-    Route::resource('budget/relocation', BudgetRelocationController::class);
-    Route::get('/api/relocations/{id}', [BudgetController::class, 'getRelocations']);
-    Route::resource('entertain', UserEntertainController::class);
+    Route::resource('budget', BudgetController::class)->except(['edit', 'update']);
+    Route::resource('user', UserController::class)->except('show');
+    Route::get('profile', [UserController::class, 'profile'])->name('profile.index');
+    Route::put('profile', [UserController::class, 'profileUpdate'])->name('profile.update');
+    Route::resource('province', ProvinceController::class)->except('show');
+    Route::resource('budget/relocation', BudgetRelocationController::class)->only(['store']);
+    Route::resource('entertain', UserEntertainController::class)->only(['index', 'show','destroy']);
     Route::get('/api/generatePdf/{id}', [UserEntertainController::class, 'generatePdf']);
-
+    Route::get('/api/relocations/{id}', [BudgetController::class, 'getRelocations']);
     Route::get('/get_entertain_data', [HomeController::class, 'getEntertainData']);
     Route::get('/get_entertain_user_input_data', [HomeController::class, 'getEntertainUserInputData']);
     Route::get('/get_budget_data', [HomeController::class, 'getBudgetData']);
-
+    Route::get('/export-user-entertain', function (Request $request) {
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
+        if ($start_date || $end_date) {
+            $fileName = 'User Entertain - ' . 
+                        ($start_date ?: 'StartDate') . ' - ' . 
+                        ($end_date ?: 'EndDate') . '.xlsx';
+        } else {
+            $fileName = 'User Entertain - ' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        }
+        $fileName = preg_replace('/[^A-Za-z0-9_\-\. ]/', '_', $fileName);
+        return Excel::download(new UserEntertainExport($start_date, $end_date), $fileName);
+    });
+    Route::get('/settings', [MetaAppController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [MetaAppController::class, 'update'])->name('settings.update');
 });
 
-// Route::middleware(['auth', 'isadmin'])->group(function () {
-//     // Route::get('/', [HomeController::class, 'index'])->name('admin');
+Route::fallback([Controller::class, 'error404']);
 
-//     Route::resource('budget', BudgetController::class);
-//     Route::resource('user', BudgetController::class);
-
-// });

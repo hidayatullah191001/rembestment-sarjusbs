@@ -79,7 +79,7 @@
         <div class="col-lg-4 mx-auto">
             <div class="auth-form-light text-left py-5 px-4 px-sm-5">
                 <div class="brand-logo">
-                    <img src="{{ asset('assets') }}/images/logo.svg" alt="logo" />
+                    <img src="{{ asset('storage/' . App\Helpers\MyHelper::getSetting('logo_large')) }}" alt="logo" />
                 </div>
 
                 @include('includes.alert')
@@ -113,10 +113,15 @@
                                 me signed in
                             </label>
                         </div>
-                        <a href="#" class="auth-link text-black">Forgot password?</a>
+                        @if (Route::has('password.request'))
+                            <a class="auth-link text-black" href="{{ route('password.request') }}">
+                                {{ __('Forgot Your Password?') }}
+                            </a>
+                        @endif
                     </div>
                     <div class="mt-3 d-grid gap-2">
-                        <button type="submit" class="btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">SIGN IN</button>
+                        <button type="submit"
+                            class="btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">SIGN IN</button>
                     </div>
 
                 </form>

@@ -39,8 +39,8 @@
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link">
+        <li class="nav-item {{ Route::is('settings.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('settings.index') }}">
                 <i class="ti-settings menu-icon"></i>
                 <span class="menu-title">App Setting</span>
             </a>

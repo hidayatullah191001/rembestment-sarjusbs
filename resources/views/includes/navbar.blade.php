@@ -1,8 +1,8 @@
 <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-        <a class="navbar-brand brand-logo me-5" href="index.html"><img src="assets/images/logo.svg" class="me-2"
+        <a class="navbar-brand brand-logo me-5" href="{{ env('APP_URL') }}"><img src="{{ asset('storage/' . App\Helpers\MyHelper::getSetting('logo_large')) }}" class="me-2"
                 alt="logo" /></a>
-        <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+        <a class="navbar-brand brand-logo-mini" href="{{ env('APP_URL') }}"><img src="{{ asset('storage/' . App\Helpers\MyHelper::getSetting('logo_mini')) }} "
                 alt="logo" /></a>
     </div>
     <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
@@ -69,11 +69,10 @@
             </li> --}}
             <li class="nav-item nav-profile dropdown">
                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
-                    <img src="assets/images/faces/face28.jpg" alt="profile" />
+                    <img src="{{ Auth::user()->photo_profile ?  asset('storage/' . Auth::user()->photo_profile) : asset('assets/images/default.jpg') }}" alt="profile" />
                 </a>
                 <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-                    <a class="dropdown-item">
-                        <i class="ti-settings text-primary"></i> Settings </a>
+                    <a class="dropdown-item" href="{{ route('profile.index') }}"><i class="ti-settings text-primary"></i> Settings </a>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button class="dropdown-item" type="submit">

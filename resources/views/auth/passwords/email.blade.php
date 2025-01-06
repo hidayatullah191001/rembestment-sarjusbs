@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
 <div class="container">
@@ -44,4 +44,55 @@
         </div>
     </div>
 </div>
+@endsection --}}
+
+
+@extends('layouts.auth')
+
+@section('content')
+    <div class="row w-100 mx-0">
+        <div class="col-lg-4 mx-auto">
+            <div class="auth-form-light text-left py-5 px-4 px-sm-5">
+                <div class="brand-logo">
+                    <img src="{{ asset('storage/' . App\Helpers\MyHelper::getSetting('logo_large')) }}" alt="logo" />
+                </div>
+
+                @include('includes.alert')
+
+                <h4>Hello! let's get started</h4>
+                <h6 class="font-weight-light">{{ __('Reset Password') }}</h6>
+                @if (session('status'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                <form class="pt-3" method="POST" action="{{ route('password.email') }}">
+                    @csrf
+
+                    <div class="form-group">
+                        <label for="email" class="text-md-end">{{ __('Email Address') }}</label>
+                        <input id="email" type="email" class="form-control form-control-sm @error('email') is-invalid @enderror"
+                            name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+
+                        @error('email')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                    <div class="row m-0">
+                        <button type="submit" class="btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">
+                            {{ __('Send Password Reset Link') }}
+                        </button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a class="auth-link text-black" href="{{ route('login') }}">
+                            Back to Login
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection

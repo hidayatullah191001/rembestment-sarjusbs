@@ -26,6 +26,31 @@
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
+                    <form action="/export-user-entertain" method="get">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="start_date">Start Date:</label>
+                                    <input type="date" id="start_date" name="start_date" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="end_date">End Date:</label>
+                                    <input type="date" id="end_date" name="end_date" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-icon-text"><i class="ti-export btn-icon-prepend"></i>Export Excel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">    
                     <div class="table-responsive">
                         <table id="entertain_table" class="display expandable-table" style="width:100%">
                             <thead>
