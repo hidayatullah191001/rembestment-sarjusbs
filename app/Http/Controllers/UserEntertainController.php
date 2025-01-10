@@ -11,6 +11,7 @@ use App\Models\UserEntertainPeserta;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserEntertainController extends Controller
 {
@@ -19,9 +20,7 @@ class UserEntertainController extends Controller
      */
     public function index()
     {
-        // $provinces = Province::has('userEntertains')->get();
-        // // dd($provinces);
-        $userEntertains = UserEntertain::all();
+        $userEntertains = UserEntertain::orderBy('created_at', 'desc')->get();
         return view('pages.entertains.index', compact('userEntertains'));
     }
 
@@ -77,6 +76,7 @@ class UserEntertainController extends Controller
         if (!$userEntertain) {
             return redirect()->route('entertain.show', $id)->with('error', 'Data entertain not found!');
         }
+        Storage::delete([$userEntertain->upload_file_1, $userEntertain->upload_file_2]);
         $userEntertain->delete();
         return redirect()->route('entertain.index',)->with('success', 'Data entertain successfully deleted!');
     }
@@ -93,6 +93,10 @@ class UserEntertainController extends Controller
         $dompdf = new Dompdf($options);
         $tipe = Type::where('id', $userEntertain->type_id)->first();
         $peserta = UserEntertainPeserta::where('user_entertain_id', $userEntertain->id)->get();
+        $upload_files = [
+            'upload_file_1' => $userEntertain->upload_file_1,
+            'upload_file_2' => $userEntertain->upload_file_2,
+        ];
         $pdfData = [
             'hari' => $userEntertain->hari,
             'tanggal' => $userEntertain->tanggal,
@@ -106,7 +110,10 @@ class UserEntertainController extends Controller
             'aktivitas' => $userEntertain->aktivitas,
             'target_pelaksanaan' => $userEntertain->target_pelaksanaan,
             'nama_account_manager' => $userEntertain->nama_account_manager,
+            'jabatan_kanwil' => $userEntertain->user->province->jabatan,
             'nama_kanwil_manager' => $userEntertain->nama_kanwil_manager,
+            'upload_files' => $upload_files,
+            
         ];
 
         $html = view('pdf-entertain', $pdfData)->render();

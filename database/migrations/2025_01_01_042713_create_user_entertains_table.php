@@ -26,6 +26,8 @@ return new class extends Migration
             $table->text('topik')->nullable();
             $table->text('aktivitas')->nullable();
             $table->text('target_pelaksanaan')->nullable();
+            $table->text('upload_file_1');
+            $table->text('upload_file_2')->nullable();
             $table->timestamps();
         });
     }

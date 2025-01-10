@@ -59,9 +59,10 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
             if ($user->role_id != null) {
-            if ($user->role->name == 'Administrator') {
+                if ($user->role_id == 1) {
                     return redirect()->route('admin');
                 } else {
+                    Auth::logout();
                     return redirect()->route('login')->with('error', 'You don\'t have permission to access this');
                 }
             } else {

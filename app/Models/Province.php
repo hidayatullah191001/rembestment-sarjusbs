@@ -9,7 +9,7 @@ class Province extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'nama_manager_unit_layanan', 'jabatan'];
 
     public function budgets(){
         return $this->hasMany(Budget::class);

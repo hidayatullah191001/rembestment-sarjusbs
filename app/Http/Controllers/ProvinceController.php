@@ -31,7 +31,9 @@ class ProvinceController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'name' => 'required|string'
+            'name' => 'required|string',
+            'nama_manager_unit_layanan' => 'required|string',
+            'jabatan' => 'required|string',
         ]);
 
         if ($validation->fails()) {
@@ -68,7 +70,9 @@ class ProvinceController extends Controller
     public function update(Request $request, Province $province)
     {
         $validation = Validator::make($request->all(), [
-            'name' => 'required|string'
+            'name' => 'required|string',
+            'nama_manager_unit_layanan' => 'required|string',
+            'jabatan' => 'required|string',
         ]);
 
 

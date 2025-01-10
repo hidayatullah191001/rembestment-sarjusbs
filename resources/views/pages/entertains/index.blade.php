@@ -7,7 +7,8 @@
             <div class="row">
                 <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                     <h3 class="font-weight-bold">User Entertain</h3>
-                    <h6 class="font-weight-normal mb-0">Efficiently manage your reimbursement submissions with accurate and timely requests.
+                    <h6 class="font-weight-normal mb-0">Efficiently manage your reimbursement submissions with accurate and
+                        timely requests.
                     </h6>
                 </div>
                 <div class="col-12 col-xl-4">
@@ -31,17 +32,20 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="start_date">Start Date:</label>
-                                    <input type="date" id="start_date" name="start_date" class="form-control form-control-sm">
+                                    <input type="date" id="start_date" name="start_date"
+                                        class="form-control form-control-sm">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="end_date">End Date:</label>
-                                    <input type="date" id="end_date" name="end_date" class="form-control form-control-sm">
+                                    <input type="date" id="end_date" name="end_date"
+                                        class="form-control form-control-sm">
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-icon-text"><i class="ti-export btn-icon-prepend"></i>Export Excel</button>
+                        <button type="submit" class="btn btn-primary btn-icon-text"><i
+                                class="ti-export btn-icon-prepend"></i>Export Excel</button>
                     </form>
                 </div>
             </div>
@@ -50,7 +54,7 @@
     <div class="row">
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
-                <div class="card-body">    
+                <div class="card-body">
                     <div class="table-responsive">
                         <table id="entertain_table" class="display expandable-table" style="width:100%">
                             <thead>
@@ -96,9 +100,32 @@
 @push('addon-script')
     <script>
         $(document).ready(function() {
+            // Simpan template HTML button untuk reset nanti
+            const buttonTemplate = '<i class="ti-import btn-icon-prepend"></i>Generate PDF';
+
+            function setLoadingState(button, isLoading) {
+                if (isLoading) {
+                    // Disable button dan tambahkan loading state
+                    button.prop('disabled', true)
+                        .html(
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
+                            );
+                } else {
+                    // Kembalikan button ke kondisi normal
+                    button.prop('disabled', false)
+                        .html(buttonTemplate);
+                }
+            }
+
             $("#entertain_table").DataTable();
+
             $(".btn-generate").click(async function() {
-                var id = $(this).attr("id");
+                // Simpan reference ke button yang diklik
+                const clickedButton = $(this);
+                var id = clickedButton.attr("id");
+
+                setLoadingState(clickedButton, true);
+
                 try {
                     var csrfToken = $("meta[name='csrf-token']").attr("content");
                     // Mengirim request AJAX untuk generate PDF
@@ -106,28 +133,13 @@
                         url: `/api/generatePdf/${id}`,
                         method: 'GET',
                         headers: {
-                            'X-CSRF-TOKEN': csrfToken // Menambahkan token CSRF di header
+                            'X-CSRF-TOKEN': csrfToken
                         },
                         processData: false,
                         contentType: false
                     });
-                    console.log(response.success);
-                    // Jika sukses
-                    if (response.success) {
-                        // Menampilkan SweetAlert pertama untuk memulai proses unduh
-                        Swal.fire({
-                            title: "Processing...",
-                            text: "Mengunduh PDF. Harap tunggu.",
-                            icon: "info",
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            background: "#fff",
-                            color: "#575656",
-                            customClass: {
-                                popup: 'shadow-lg rounded-lg'
-                            }
-                        });
 
+                    if (response.success) {
                         // Mengonversi base64 ke Blob dan memulai unduhan
                         const binaryString = window.atob(response.pdf_content);
                         const bytes = new Uint8Array(binaryString.length);
@@ -145,31 +157,25 @@
                         document.body.appendChild(link);
                         link.click();
 
-                        // Cleanup
                         window.URL.revokeObjectURL(url);
                         document.body.removeChild(link);
 
-                        // Menunggu beberapa detik untuk memastikan unduhan selesai
-                        setTimeout(() => {
-                            Swal.fire({
-                                title: "Success!",
-                                text: "PDF berhasil diunduh!",
-                                icon: "success",
-                                confirmButtonText: "OK",
-                                allowOutsideClick: false,
-                                background: "#fff",
-                                color: "#575656",
-                                customClass: {
-                                    confirmButton: 'btn btn-primary'
-                                },
-                                buttonsStyling: false
-                            }).then(() => {
-                                // Redirect setelah SweetAlert sukses
-                                window.location.href = response.redirect;
-                            });
-                        }, 3000);
+                        Swal.fire({
+                            title: "Success!",
+                            text: "PDF berhasil diunduh!",
+                            icon: "success",
+                            confirmButtonText: "OK",
+                            allowOutsideClick: false,
+                            background: "#fff",
+                            color: "#575656",
+                            customClass: {
+                                confirmButton: 'btn btn-primary'
+                            },
+                            buttonsStyling: false
+                        }).then(() => {
+                            window.location.href = response.redirect;
+                        });
                     } else {
-                        // Menampilkan error jika gagal
                         Swal.fire({
                             title: "Error!",
                             text: response.message || "Terjadi kesalahan!",
@@ -185,7 +191,6 @@
                         });
                     }
                 } catch (error) {
-                    // Menangani error jika gagal
                     Swal.fire({
                         title: "Error!",
                         text: "Gagal generate pdf: " + (error.responseJSON?.message || error
@@ -200,6 +205,8 @@
                         },
                         buttonsStyling: false
                     });
+                } finally {
+                    setLoadingState(clickedButton, false);
                 }
             });
         });

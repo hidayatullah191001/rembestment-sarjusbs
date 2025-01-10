@@ -21,9 +21,11 @@ class MetaAppController extends Controller
             'icon_app' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'logo_large' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'logo_mini' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'nama_manager_pemasaran' => 'required|string|max:255',
+            'jabatan_lengkap' => 'required|string|max:255',
         ]);
 
-        $fields = ['app_name', 'app_footer'];
+        $fields = ['app_name', 'app_footer', 'nama_manager_pemasaran', 'jabatan_lengkap'];
 
         foreach ($fields as $field) {
             MetaApp::updateOrCreate(

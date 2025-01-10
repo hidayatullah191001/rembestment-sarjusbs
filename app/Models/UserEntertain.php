@@ -23,6 +23,8 @@ class UserEntertain extends Model
         'topik',
         'aktivitas',
         'target_pelaksanaan',
+        'upload_file_1',
+        'upload_file_2',
     ];
 
     public function peserta()

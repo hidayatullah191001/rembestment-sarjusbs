@@ -22,38 +22,37 @@
         @include('includes.alert')
     </div>
     <div class="row">
-        <div class="col-md-8 grid-margin stretch-card">
+        <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="table-responsive">
-                                <table id="example" class="display expandable-table" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Created At</th>
-                                            <th>Name</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-
-                                        @foreach ($provinces as $index => $province)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ App\Helpers\MyHelper::ubahFormatTimestamp($province->created_at) }}</td>
-                                                <td>{{ $province->name }}</td>
-                                                <td>
-                                                    <a href="{{ route('province.edit', $province->id) }}" class="btn btn-sm btn-primary btn-icon-text"><i class="ti-pencil btn-icon-prepend"></i>Edit</a>
-                                                    <button data-id="{{ $province->id }}" data-name="{{ $province->name }}" class="btn btn-sm btn-danger btn-delete""><i class="ti-trash btn-icon-prepend"></i>Delete</button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table id="example" class="display expandable-table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Created At</th>
+                                    <th>Name</th>
+                                    <th>Nama Manager Unit Layanan</th>
+                                    <th>Jabatan Manager Unit Layanan</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($provinces as $index => $province)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ App\Helpers\MyHelper::ubahFormatTimestamp($province->created_at) }}</td>
+                                        <td>{{ $province->name }}</td>
+                                        <td>{{ $province->nama_manager_unit_layanan }}</td>
+                                        <td>{{ $province->jabatan }}</td>
+                                        <td>
+                                            <a href="{{ route('province.edit', $province->id) }}" class="btn btn-sm btn-primary btn-icon-text"><i class="ti-pencil btn-icon-prepend"></i>Edit</a>
+                                            <button data-id="{{ $province->id }}" data-name="{{ $province->name }}" class="btn btn-sm btn-danger btn-delete""><i class="ti-trash btn-icon-prepend"></i>Delete</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

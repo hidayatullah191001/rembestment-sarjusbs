@@ -93,11 +93,9 @@
                                 <tr>
                                     <th>Peserta</th>
                                     <td>
-                                        @foreach ($userEntertain->peserta as $item)
-                                            <ol>
-                                                <li>{{ $item->nama_pelanggan }}
-                                                    {{ $item->internal_icon ? '-' . $item->internal_icon : '' }}</li>
-                                            </ol>
+                                        @foreach ($userEntertain->peserta as $index => $item)
+                                        <p>{{ $index + 1 }}. {{ $item->nama_pelanggan }}
+                                            {{ $item->internal_icon ? '-' . $item->internal_icon : '' }}</p>
                                         @endforeach
                                     </td>
                                 </tr>

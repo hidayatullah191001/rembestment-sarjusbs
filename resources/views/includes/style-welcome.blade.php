@@ -68,4 +68,20 @@
     .swal2-title {
         color: #575656;
     }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+    }
+
+    @keyframes spinner-border {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>

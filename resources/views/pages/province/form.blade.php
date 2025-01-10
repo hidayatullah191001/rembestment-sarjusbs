@@ -37,10 +37,28 @@
                         @endif
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Province Name</label>
+                            <label for="name" class="form-label">Nama Province</label>
                             <input type="text" class="form-control form-control-sm @error('name') is_invalid @enderror"
                                 id="name" name="name" value="{{ old('name', $province->name ?? '') }}" required>
                             @error('name')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nama_manager_unit_layanan" class="form-label">Nama Manager Unit Layanan</label>
+                            <input type="text" class="form-control form-control-sm @error('nama_manager_unit_layanan') is_invalid @enderror"
+                                id="nama_manager_unit_layanan" name="nama_manager_unit_layanan" value="{{ old('nama_manager_unit_layanan', $province->nama_manager_unit_layanan ?? '') }}" required>
+                            @error('nama_manager_unit_layanan')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="jabatan" class="form-label">Jabatan</label>
+                            <input type="text" class="form-control form-control-sm @error('jabatan') is_invalid @enderror"
+                                id="jabatan" name="jabatan" value="{{ old('jabatan', $province->jabatan ?? '') }}" required>
+                            @error('jabatan')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>

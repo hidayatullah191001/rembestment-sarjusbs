@@ -1,11 +1,9 @@
 <script>
     $('#provinsi').select2();
     $(document).ready(function() {
-
         let currentStep = 1;
-        const totalSteps = 3;
+        const totalSteps = 4;
 
-        // Initialize Flatpickr
         flatpickr('input[type="date"]');
         flatpickr('input[type="time"]', {
             enableTime: true,
@@ -13,7 +11,6 @@
             dateFormat: "H:i",
         });
 
-        // Handle Next button
         $('#nextBtn').click(function() {
             if (validateCurrentSection()) {
                 saveCurrentStep();
@@ -24,7 +21,6 @@
             }
         });
 
-        // Handle Previous button
         $('#prevBtn').click(function() {
             if (currentStep > 1) {
                 currentStep--;
@@ -32,31 +28,41 @@
             }
         });
 
-        // Handle form submission
+        function setLoadingState(isLoading) {
+            const submitBtn = $('#submitBtn');
+            if (isLoading) {
+                // Disable button dan tambahkan loading state
+                submitBtn.prop('disabled', true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...'
+                    );
+            } else {
+                // Kembalikan button ke kondisi normal
+                submitBtn.prop('disabled', false)
+                    .html('Submit');
+            }
+        }
+
         $('#entertainForm').submit(function(e) {
             e.preventDefault();
+            setLoadingState(true);
             if (validateCurrentSection()) {
                 saveCurrentStep();
                 submitForm();
+            } else {
+                setLoadingState(false);
             }
         });
 
         $('.currency-input').on('input', function() {
             let value = $(this).val();
-
-            // Hapus semua karakter kecuali angka
             value = value.replace(/[^\d]/g, '');
-
-            // Format ke rupiah
             $(this).val(formatRupiah(value));
-
-            // Simpan nilai numerik ke hidden input
             let numericValue = getNominal(value);
             let hiddenInput = $(this).attr('id') + '_value';
             $('#' + hiddenInput).val(numericValue);
         });
 
-        // Validasi sebelum submit
         $('#entertainForm').on('submit', function(e) {
             $('.currency-input').each(function() {
                 let numericValue = getNominal($(this).val());
@@ -66,57 +72,25 @@
 
         });
 
-        // Add Peserta button handler
-        let pesertaCount = 1;
-        $('#addPeserta').click(function() {
-            const newPeserta = `
-                <div class="peserta-item" id="peserta-${pesertaCount}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0">Peserta #${pesertaCount + 1}</h6>
-                        <button type="button" class="btn btn-danger btn-sm delete-peserta" data-id="${pesertaCount}">
-                            <i class="bi bi-trash"></i> Hapus
-                        </button>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nama Pelanggan</label>
-                        <input type="text" class="form-control form-control-sm" name="peserta[${pesertaCount}][nama_pelanggan]">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Internal Icon</label>
-                        <input type="text" class="form-control form-control-sm" name="peserta[${pesertaCount}][internal_icon]">
-                    </div>
-                </div>
-            `;
-            $('#pesertaContainer').append(newPeserta);
-            pesertaCount++;
-            updatePesertaNumbers();
-        });
+        function generatePesertaRows() {
+            const maxRows = 10;
+            const tbody = document.getElementById('pesertaTableBody');
+            tbody.innerHTML = '';
 
-        $(document).on('click', '.delete-peserta', function() {
-            const pesertaId = $(this).data('id');
-            const totalPeserta = $('.peserta-item').length;
+            for (let i = 0; i < maxRows; i++) {
+                const row = document.createElement('tr');
+                row.id = `peserta-${i}`;
 
-            // Cek apakah ini peserta terakhir
-            if (totalPeserta > 1) {
-                $(`#peserta-${pesertaId}`).remove();
-                updatePesertaNumbers();
-            } else {
-                alert('Minimal harus ada satu peserta!');
+                row.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td><input type="text" class="form-control form-control-sm" name="peserta[${i}][nama_pelanggan]"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="peserta[${i}][internal_icon]"></td>
+                `;
+
+                tbody.appendChild(row);
             }
-        });
-
-        // $(document).on('click', '.delete-peserta', function() {
-        //     const pesertaId = $(this).data('id');
-        //     $(`#peserta-${pesertaId}`).remove();
-        //     updatePesertaNumbers();
-        // });
-
-        // Fungsi untuk update nomor urut peserta
-        function updatePesertaNumbers() {
-            $('.peserta-item').each(function(index) {
-                $(this).find('h6').text(`Peserta #${index + 1}`);
-            });
         }
+        generatePesertaRows();
 
         function updateFormDisplay() {
             // Update sections visibility
@@ -185,20 +159,6 @@
                 });
 
                 if (response.success) {
-                    // SweetAlert pertama untuk memulai proses unduh
-                    Swal.fire({
-                        title: "Processing...",
-                        text: "Mengunduh PDF. Harap tunggu.",
-                        icon: "info",
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        background: "#fff",
-                        color: "#575656",
-                        customClass: {
-                            popup: 'shadow-lg rounded-lg'
-                        }
-                    });
-
                     // Konversi base64 ke blob dan mulai unduhan
                     const binaryString = window.atob(response.pdf_content);
                     const bytes = new Uint8Array(binaryString.length);
@@ -220,25 +180,24 @@
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(link);
 
-                    // Tunggu beberapa detik untuk memastikan unduhan selesai
-                    setTimeout(() => {
-                        Swal.fire({
-                            title: "Success!",
-                            text: "Data berhasil disimpan dan PDF berhasil diunduh!",
-                            icon: "success",
-                            confirmButtonText: "OK",
-                            allowOutsideClick: false,
-                            background: "#fff",
-                            color: "#575656",
-                            customClass: {
-                                confirmButton: 'btn btn-primary'
-                            },
-                            buttonsStyling: false
-                        }).then(() => {
-                            // Redirect setelah SweetAlert sukses
-                            window.location.href = response.redirect;
-                        });
-                    }, 3000);
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Data berhasil disimpan dan PDF berhasil diunduh!",
+                        icon: "success",
+                        confirmButtonText: "OK",
+                        allowOutsideClick: false,
+                        background: "#fff",
+                        color: "#575656",
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        // Redirect setelah SweetAlert sukses
+                        window.location.href = response.redirect;
+                    });
+
+                    setLoadingState(false);
                 } else {
                     Swal.fire({
                         title: "Error!",
@@ -253,6 +212,7 @@
                         },
                         buttonsStyling: false
                     });
+                    setLoadingState(false);
                 }
             } catch (error) {
                 Swal.fire({
@@ -269,9 +229,9 @@
                     },
                     buttonsStyling: false
                 });
+                setLoadingState(false);
             }
         }
-
 
         function formatRupiah(angka, prefix) {
             let number_string = angka.replace(/[^,\d]/g, '').toString(),

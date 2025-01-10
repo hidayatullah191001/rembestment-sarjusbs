@@ -29,16 +29,18 @@
                             <h4>Halo, Silahkan isi Form Entertain</h4>
                         </div>
                     </div>
+                    @include('includes.alert')
                     <div class="row w-100 mx-0 mt-3">
                         <div class="col-lg-8 mx-auto">
                             <div class="step-indicator text-center">
                                 <div class="step active" id="step-1">Informasi Dasar</div>
                                 <div class="step" id="step-2">Informasi Entertain</div>
-                                <div class="step" id="step-3">Informasi Tindak Lanjut</div>
+                                <div class="step" id="step-3">Informasi Peserta</div>
+                                <div class="step" id="step-4">Informasi Tindak Lanjut</div>
                             </div>
 
                             <!-- Form Sections -->
-                            <form id="entertainForm" method="post" action="{{ route('store-entertain') }}">
+                            <form id="entertainForm" method="post" action="{{ route('store-entertain') }}" enctype="multipart/form-data">
                                 @csrf
                                 <!-- Step 1: Informasi Dasar -->
                                 <div class="form-section active" id="section-1">
@@ -47,42 +49,48 @@
                                         <select class="form-select" name="province_id" id="provinsi" required>
                                             <option selected disabled>Pilih Provinsi</option>
                                             @foreach ($provinces as $province)
-                                                <option value="{{ $province->id }}"
+                                                <option data-nama_kanwil="{{ $province->nama_manager_unit_layanan }}" value="{{ $province->id }}"
                                                     {{ old('province_id', $step1Data['province_id'] ?? '') == $province->id ? 'selected' : '' }}>
                                                     {{ $province->name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group mb-3">
-                                        <label for="user">Data User</label>
+                                    <div id="user_display" class="mb-3">
+                                        <label class="form-label">Nama Account Manager</label>
                                         <select class="form-control select2" id="user" name="user_id">
-                                            <option selected disabled>Pilih User</option>
+                                            <option selected disabled>Pilih Account Manager</option>
+                                            @if(isset($step1Data['user_id']))
+                                                <option value="{{ $step1Data['user_id'] }}" 
+                                                    data-name="{{ $step1Data['nama_lengkap'] }}"
+                                                    data-email="{{ $step1Data['email'] }}"
+                                                    selected>{{ $step1Data['nama_lengkap'] }}</option>
+                                            @endif
                                         </select>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Nama Lengkap</label>
-                                        <input type="text" class="form-control form-control-sm" id="nama_lengkap"
+                                    <div id="nama_lengkap_display" class="mb-3">
+                                        <label class="form-label">Nama Account Manager</label>
+                                        <input type="text"  class="form-control form-control-sm" id="nama_lengkap"
                                             name="nama_lengkap" value="{{ old('nama_lengkap', $step1Data['nama_lengkap'] ?? '') }}" readonly required>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label">Email</label>
+                                        <label class="form-label">Email Korporat</label>
                                         <input type="email" class="form-control form-control-sm" id="email"
                                             name="email" value="{{ old('email', $step1Data['email'] ?? '') }}" readonly required>
                                     </div>
-                                    <div class="mb-3">
+                                    <div class="mb-3 d-none">
                                         <label class="form-label">Nama Account Manager</label>
-                                        <input type="text" class="form-control form-control-sm"
+                                        <input type="text" class="form-control form-control-sm" id="nama_account_manager"
                                             value="{{ old('nama_account_manager', $step1Data['nama_account_manager'] ?? '') }}"
                                             name="nama_account_manager" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Nama Kanwil Manager</label>
-                                        <input type="text" class="form-control form-control-sm"
+                                        <label class="form-label">Manager Unit Layanan</label>
+                                        <input type="text" class="form-control form-control-sm" id="nama_kanwil_manager"
                                             value="{{ old('nama_kanwil_manager', $step1Data['nama_kanwil_manager'] ?? '') }}"
-                                            name="nama_kanwil_manager" required>
+                                            name="nama_kanwil_manager" required readonly>
                                     </div>
                                 </div>
 
@@ -153,7 +161,7 @@
                                             value="{{ old('pelanggan', $step2Data['pelanggan'] ?? '') }}" required>
                                     </div>
 
-                                    <!-- Peserta Section -->
+                                    {{-- <!-- Peserta Section -->
                                     <div id="pesertaContainer">
                                         <h5>Data Peserta (Opsional)</h5>
                                         <div class="peserta-item" id="peserta-0">
@@ -175,13 +183,29 @@
                                                     name="peserta[0][internal_icon]">
                                             </div>
                                         </div>
+                                    </div> --}}
+                                </div>
+
+                                <div class="form-section" id="section-3">
+                                    <div id="stepPeserta">
+                                        <h5>Data Peserta (Opsional)</h5>
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Nama Pelanggan</th>
+                                                    <th>Internal Icon</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pesertaTableBody">
+                                                <!-- Baris Data Peserta Dinamis -->
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <button type="button" class="btn btn-secondary" id="addPeserta">Tambah
-                                        Peserta</button>
                                 </div>
 
                                 <!-- Step 3: Informasi Tindak Lanjut -->
-                                <div class="form-section" id="section-3">
+                                <div class="form-section" id="section-4">
                                     <div class="mb-3">
                                         <label class="form-label">Topik</label>
                                         <textarea class="form-control" name="topik" rows="3" required>{{ old('topik', $step3Data['topik'] ?? '') }}</textarea>
@@ -192,7 +216,16 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Target Pelaksanaan</label>
-                                        <textarea class="form-control" name="target_pelaksanaan" rows="3" required>{{ old('target_pelaksanaan', $step3Data['target_pelaksanaan'] ?? '') }}</textarea>
+                                        <input type="date" class="form-control form-control-sm" name="target_pelaksanaan"
+                                                value="{{ old('target_pelaksanaan', $step3Data['target_pelaksanaan'] ?? '') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">File Pendukung #1</label>
+                                        <input type="file" name="upload_file_1" id="upload_file_1" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">File Pendukung #2 (Opsional)</label>
+                                        <input type="file" name="upload_file_2" id="upload_file_2" class="form-control">
                                     </div>
                                 </div>
 
@@ -216,13 +249,17 @@
 
     @include('includes.script')
     @include('includes.script-welcome')
-    <script>
+    {{-- <script>
         $(document).ready(function() {
             $('#user').select2();
+            $('#nama_lengkap_display').attr('hidden', true);
             // Fungsi untuk mendapatkan users berdasarkan province
             $('#provinsi').on('change', function() {
                 var provinceId = $(this).val();
-
+                var selectedOption = $(this).find('option:selected');
+                // console.log(selectedOption);
+                $('#nama_kanwil_manager').val(selectedOption.data('nama_kanwil'));
+                console.log(selectedOption.data('nama_kanwil'));
                 // Reset dropdown user
                 $('#user').html('<option value="">Pilih User</option>');
 
@@ -240,13 +277,16 @@
                                     ${user.name}
                                 </option>`);
                             });
-
+                            $('#user_display').attr('hidden', false);
+                            $('#nama_lengkap_display').attr('hidden', true);
                             // Tambahkan opsi manual input
                             $('#user').append('<option value="manual">Input Manual</option>');
                         } else {
+                            $('#user_display').attr('hidden', true);
                             // Jika tidak ada user, langsung set ke manual input
                             $('#user').append('<option value="manual">Input Manual</option>');
                             $('#user').val('manual');
+                            $('#nama_lengkap_display').attr('hidden', false);
                             enableManualInput();
                         }
                     },
@@ -265,6 +305,8 @@
 
                 if ($(this).val() === 'manual') {
                     // Aktifkan input manual
+                    $('#user_display').attr('hidden', true);
+                    $('#nama_lengkap_display').attr('hidden', false);
                     enableManualInput();
                 } else {
                     // Nonaktifkan input manual dan isi data
@@ -273,6 +315,7 @@
                     // Isi nama dan email dari data user
                     $('#nama_lengkap').val(selectedOption.data('name'));
                     $('#email').val(selectedOption.data('email'));
+                    $('#nama_account_manager').val(selectedOption.data('name'));
                 }
             });
 
@@ -280,6 +323,9 @@
             function enableManualInput() {
                 $('#nama_lengkap, #email').prop('readonly', false);
                 $('#nama_lengkap, #email').val('');
+                $('#nama_lengkap').change(function(){
+                    $('#nama_account_manager').val($(this).val())
+                })
             }
 
             // Fungsi untuk menonaktifkan input manual
@@ -287,6 +333,106 @@
                 $('#nama_lengkap, #email').prop('readonly', true);
             }
         });
+    </script> --}}
+
+    <script>
+        $(document).ready(function() {
+    $('#user').select2();
+    $('#nama_lengkap_display').attr('hidden', true);
+    
+    // Cek jika ada data session untuk province dan user
+    @if(isset($step1Data['province_id']) && isset($step1Data['user_id']))
+        var provinceId = {{ $step1Data['province_id'] }};
+        
+        // Set nilai email dan nama dari session
+        $('#email').val('{{ $step1Data['email'] ?? "" }}');
+        $('#nama_lengkap').val('{{ $step1Data['nama_lengkap'] ?? "" }}');
+        $('#nama_account_manager').val('{{ $step1Data['nama_lengkap'] ?? "" }}');
+        
+        // Load users untuk province yang dipilih
+        loadUsers(provinceId, {{ $step1Data['user_id'] }});
+    @endif
+
+    // Fungsi untuk load users
+    function loadUsers(provinceId, selectedUserId = null) {
+        $.ajax({
+            url: `/get-users-by-province/${provinceId}`,
+            method: 'GET',
+            success: function(response) {
+                if (response.length > 0) {
+                    // Reset dan tambahkan users ke dropdown
+                    $('#user').html('<option value="">Pilih User</option>');
+                    $.each(response, function(index, user) {
+                        var selected = (selectedUserId && selectedUserId == user.id) ? 'selected' : '';
+                        $('#user').append(`<option value="${user.id}" 
+                            data-name="${user.name}" 
+                            data-email="${user.email}" ${selected}>
+                            ${user.name}
+                        </option>`);
+                    });
+                    $('#user_display').attr('hidden', false);
+                    $('#nama_lengkap_display').attr('hidden', true);
+                    $('#user').append('<option value="manual">Input Manual</option>');
+                    
+                    if(selectedUserId) {
+                        $('#user').trigger('change');
+                    }
+                } else {
+                    $('#user_display').attr('hidden', true);
+                    $('#user').append('<option value="manual">Input Manual</option>');
+                    $('#user').val('manual');
+                    $('#nama_lengkap_display').attr('hidden', false);
+                    enableManualInput();
+                }
+            },
+            error: function() {
+                alert('Gagal mengambil data users');
+            }
+        });
+    }
+
+    // Event handler untuk perubahan province
+    $('#provinsi').on('change', function() {
+        var provinceId = $(this).val();
+        var selectedOption = $(this).find('option:selected');
+        $('#nama_kanwil_manager').val(selectedOption.data('nama_kanwil'));
+        
+        loadUsers(provinceId);
+        
+        // Reset input jika tidak ada session data
+        if (!{{ isset($step1Data['user_id']) ? 'true' : 'false' }}) {
+            $('#nama_lengkap, #email').val('');
+        }
+    });
+
+    // Handler lainnya tetap sama
+    $('#user').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+
+        if ($(this).val() === 'manual') {
+            $('#user_display').attr('hidden', true);
+            $('#nama_lengkap_display').attr('hidden', false);
+            enableManualInput();
+        } else {
+            disableManualInput();
+            $('#nama_lengkap').val(selectedOption.data('name'));
+            $('#email').val(selectedOption.data('email'));
+            $('#nama_account_manager').val(selectedOption.data('name'));
+        }
+    });
+
+    function enableManualInput() {
+        $('#nama_lengkap, #email').prop('readonly', false);
+        $('#nama_lengkap, #email').val('');
+        $('#nama_lengkap').change(function(){
+            $('#nama_account_manager').val($(this).val())
+        });
+    }
+
+    function disableManualInput() {
+        $('#nama_lengkap, #email').prop('readonly', true);
+    }
+});
     </script>
 </body>
 

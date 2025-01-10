@@ -70,7 +70,7 @@
                         <tr><th class="p-0">NO</th><th class="p-0">PELANGGAN</th><th class="p-0">INTERNAL ICON+</th></tr>
                     </thead>
                     <tbody>
-                        @foreach($peserta as $key => $item)
+                        @foreach ($peserta as $key => $item)
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $item['nama_pelanggan'] }}</td>
@@ -107,6 +107,7 @@
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <style>
@@ -115,7 +116,7 @@
             font-size: 12px;
             line-height: 1.4;
         }
-        
+
         .header {
             text-align: center;
             background-color: #f0f0f0;
@@ -124,61 +125,62 @@
             font-weight: bold;
             font-size: 14px;
         }
-        
+
         .form-group {
             margin-bottom: 10px;
         }
-        
+
         .form-label {
             display: inline-block;
             width: 150px;
         }
-        
+
         .form-value {
             display: inline-block;
             min-width: 200px;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
-        
-        th, td {
+
+        th,
+        td {
             border: 1px solid #000;
             padding: 5px;
             text-align: left;
         }
-        
+
         th {
             background-color: #d8d8d8;
             color: black;
         }
-        
+
         .footer {
             margin-top: 30px;
             width: 100%;
             position: relative;
         }
-        
+
         .top-signatures {
             width: 100%;
             margin-bottom: 60px;
         }
-        
+
         .signature-block {
             float: left;
             text-align: center;
             width: 45%;
             margin-right: 5%;
         }
-        
+
         .signature-block:last-child {
             margin-right: 0;
             float: right;
         }
-        
+
         .bottom-signature {
             clear: both;
             width: 40%;
@@ -187,7 +189,7 @@
             margin-top: 40px;
             padding-top: 20px;
         }
-        
+
         .signature-line {
             border-top: 1px solid #000;
             margin-bottom: 5px;
@@ -197,19 +199,19 @@
         }
 
         .space-mt {
-            margin-top: 80px;
+            margin-top: 50px;
         }
-        
+
         .clear {
             clear: both;
             height: 1px;
             width: 100%;
         }
-        
+
         .bold {
             font-weight: bold;
         }
-        
+
         .name-size {
             font-size: 14px;
         }
@@ -219,47 +221,57 @@
             margin-top: 20px;
             position: relative;
         }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         FORM ENTERTAIN PENJUALAN
     </div>
-    
+
     <div class="form-group">
-        <span class="form-label">HARI</span>: 
+        <span class="form-label">HARI</span>:
         <span class="form-value">{{ $hari }}</span>
     </div>
-    
+
     <div class="form-group">
-        <span class="form-label">TANGGAL</span>: 
+        <span class="form-label">TANGGAL</span>:
         <span class="form-value">{{ $tanggal }}</span>
     </div>
-    
+
     <div class="form-group">
-        <span class="form-label">WAKTU</span>: 
+        <span class="form-label">WAKTU</span>:
         <span class="form-value">{{ $waktu }}</span>
     </div>
-    
+
     <div class="form-group">
-        <span class="form-label">TIPE</span>: 
+        <span class="form-label">TIPE</span>:
         <span class="form-value">{{ $tipe }}</span>
     </div>
-    
+
     <div class="form-group">
-        <span class="form-label">NILAI ENTERTAIN</span>: Rp. 
+        <span class="form-label">NILAI ENTERTAIN</span>: Rp.
         <span class="form-value">{{ App\Helpers\MyHelper::rupiah($nilai_entertain) }}</span>
     </div>
-    
+
     <div class="form-group">
-        <span class="form-label">REVENUE</span>: Rp. 
+        <span class="form-label">REVENUE</span>: Rp.
         <span class="form-value">{{ App\Helpers\MyHelper::rupiah($revenue) }}</span>
     </div>
     <div class="form-group">
-        <span class="form-label">PELANGGAN</span>: 
+        <span class="form-label">PELANGGAN</span>:
         <span class="form-value">{{ $pelanggan }}</span>
     </div>
-    
+
     @if (count($peserta) > 0)
         <table>
             <thead>
@@ -270,12 +282,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($peserta as $index => $item)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $item['nama_pelanggan'] }}</td>
-                    <td>{{ $item['internal_icon'] }}</td>
-                </tr>
+                @foreach ($peserta as $index => $item)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $item['nama_pelanggan'] }}</td>
+                        <td>{{ $item['internal_icon'] }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -297,35 +309,54 @@
             </tr>
         </tbody>
     </table>
-    
+
     <div class="signature-container">
         <div class="top-signatures">
             <div class="signature-block">
                 <div>Yang mengajukan,</div>
                 <div class="space-mt"></div>
-                <div class="name-size">{{$nama_account_manager}}</div>
+                <div class="name-size">{{ $nama_account_manager }}</div>
                 <div class="signature-line"></div>
                 <div class="bold">ACCOUNT MANAGER</div>
             </div>
-            
+
             <div class="signature-block">
                 <div>Mengetahui,</div>
                 <div class="space-mt"></div>
-                <div class="name-size">{{$nama_kanwil_manager}}</div>
+                <div class="name-size">{{ $nama_kanwil_manager }}</div>
                 <div class="signature-line"></div>
-                <div class="bold">MANAGER KANTOR PERWAKILAN</div>
+                <div class="bold">{{ $jabatan_kanwil }}</div>
             </div>
-            
+
             <div class="clear"></div>
         </div>
-        
+
         <div class="bottom-signature">
             <div>Menyetujui,</div>
             <div class="space-mt"></div>
-            <div class="name-size">HIZMA JONATHAPOLI</div>
+            <div class="name-size">{{ App\Helpers\MyHelper::getSetting('nama_manager_pemasaran') }}</div>
             <div class="signature-line"></div>
-            <div class="bold">MANAGER PEMASARAN DAN PENJUALAN SBU SUMBASEL</div>
+            <div class="bold">{{ App\Helpers\MyHelper::getSetting('jabatan_lengkap') }}</div>
         </div>
     </div>
+
+    <div class="page-break"></div>
+    <div class="header">
+        FORM ENTERTAIN PENJUALAN
+    </div>
+    @php
+        $image1 = base64_encode(file_get_contents(public_path('storage/' . $upload_files['upload_file_1'])));
+        if($upload_files['upload_file_2']){
+            $image2 = base64_encode(file_get_contents(public_path('storage/' . $upload_files['upload_file_2'])));
+        }
+    @endphp
+    <h3 for="">File Pendukung #1</h3>
+    <img src="data:image/jpeg;base64,{{ $image1 }}" alt="Upload File 1">
+    @if ($upload_files['upload_file_2'])
+        <h3 for="">File Pendukung #2</h3>
+        <img src="data:image/jpeg;base64,{{ $image2 }}" alt="Upload File 2">
+    @endif
+
 </body>
+
 </html>

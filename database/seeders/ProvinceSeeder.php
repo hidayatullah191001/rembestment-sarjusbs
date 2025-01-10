@@ -14,79 +14,29 @@ class ProvinceSeeder extends Seeder
     public function run(): void
     {
         Province::create([
-            'name' => 'Sumatera Utara'
+            'name' => 'Sumatera Selatan',
+            'nama_manager_unit_layanan' => 'Setia Budi',
+            'jabatan' => ' MANAGER KANTOR PERWAKILAN SUMSEL',
         ]);
         Province::create([
-            'name' => 'Sumatera Barat'
+            'name' => 'Jambi',
+            'nama_manager_unit_layanan' => 'Ahmad Syafii',
+            'jabatan' => ' MANAGER KANTOR PERWAKILAN JAMBI',
         ]);
         Province::create([
-            'name' => 'Riau'
+            'name' => 'Kepulauan Bangka Belitung',
+            'nama_manager_unit_layanan' => 'Inaka Tomo',
+            'jabatan' => ' MANAGER KANTOR PERWAKILAN BABEL',
         ]);
         Province::create([
-            'name' => 'Jambi'
+            'name' => 'Bengkulu',
+            'nama_manager_unit_layanan' => 'Narto Masmuki',
+            'jabatan' => ' MANAGER KANTOR PERWAKILAN BENGKULU',
         ]);
         Province::create([
-            'name' => 'Sumatera Selatan'
-        ]);
-        Province::create([
-            'name' => 'Kepulauan Riau'
-        ]);
-        Province::create([
-            'name' => 'Kepulauan Bangka Belitung'
-        ]);
-        Province::create([
-            'name' => 'DKI Jakarta'
-        ]);
-        Province::create([
-            'name' => 'Jawa Barat'
-        ]);
-        Province::create([
-            'name' => 'Jawa Tengah'
-        ]);
-        Province::create([
-            'name' => 'Jawa Timur'
-        ]);
-        Province::create([
-            'name' => 'Banten'
-        ]);
-        Province::create([
-            'name' => 'Bali'
-        ]);
-        Province::create([
-            'name' => 'Nusa Tenggara Timur'
-        ]);
-        Province::create([
-            'name' => 'Nusa Tenggara Barat'
-        ]);
-        Province::create([
-            'name' => 'Kalimantan Utara'
-        ]);
-        Province::create([
-            'name' => 'Kalimantan Timur'
-        ]);
-        Province::create([
-            'name' => 'Kalimantan Selatan'
-        ]);
-        Province::create([
-            'name' => 'Kalimantan Barat'
-        ]);
-        Province::create([
-            'name' => 'Sulawesi Tengah'
-        ]);
-        Province::create([
-            'name' => 'Sulawesi Utara'
-        ]);
-        Province::create([
-            'name' => 'Sulawesi Tenggara'
-        ]);
-        Province::create([
-            'name' => 'Sulawesi Barat'
-        ]);
-        Province::create([
-            'name' => 'Gorontalo'
-        ]);
-        Province::create([
-            'name' => 'Maluku Utara'
+            'name' => 'Lampung',
+            'nama_manager_unit_layanan' => 'Suryani Apik',
+            'jabatan' => ' MANAGER KANTOR PERWAKILAN LAMPUNG',
         ]);
     }
 }

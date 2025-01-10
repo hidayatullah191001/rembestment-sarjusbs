@@ -34,6 +34,7 @@ Auth::routes(['register' => false]);
 Route::post('/save-step-1', [WelcomeController::class, 'saveStep1']);
 Route::post('/save-step-2', [WelcomeController::class, 'saveStep2']);
 Route::post('/save-step-3', [WelcomeController::class, 'saveStep3']);
+Route::post('/save-step-4', [WelcomeController::class, 'saveStep4']);
 Route::post('/store-entertain', [WelcomeController::class, 'store'])->name('store-entertain');
 
 Route::get('/get-users-by-province/{province_id}', [WelcomeController::class, 'getUsersByProvince'])->name('get-users-by-province');

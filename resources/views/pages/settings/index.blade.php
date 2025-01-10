@@ -66,6 +66,16 @@
                         <label for="app_url" class="form-label">App URL</label>
                         <input type="text" class="form-control form-control-sm  " id="app_url" value="{{ $settings['app_url'] ?? config('app.url') }}" disabled>
                     </div>
+                    
+                    <div class="mb-3">
+                        <label for="nama_manager_pemasaran" class="form-label">Nama Manager Pemasaran</label>
+                        <input type="text" class="form-control form-control-sm" name="nama_manager_pemasaran" value="{{ $settings['nama_manager_pemasaran'] ?? '' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="jabatan_lengkap" class="form-label">Jabatan Lengkap</label>
+                        <input type="text" class="form-control form-control-sm" name="jabatan_lengkap" value="{{ $settings['jabatan_lengkap'] ?? '' }}" required>
+                    </div>
             
                     <button type="submit" class="btn btn-primary">Save Settings</button>
                 </form>
